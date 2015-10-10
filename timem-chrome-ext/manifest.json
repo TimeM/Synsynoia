@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "TimeM",
-  "description": "This extension attempts to track time on websites",
+  "name": "TimeMDemo Server",
+  "description": "TimeM Extension for Masi Demo Server testing",
   "version": "1.0",
 
   "background" :{
@@ -17,8 +17,8 @@
     }
   ],
   "browser_action": {
-	"default_title": "Tracker",
-    "default_icon": "icon.png",
+	"default_title": "TimeM Time Tracker Demo Server",
+    "default_icon": "news3.png",
     "default_popup": "popup.html"
   },
   "permissions": [

@@ -1,8 +1,8 @@
 $(document).ready(function() {
   uname = readCookie("usernameext");
   //alert(uname);
-  if(uname!="" && uname!=null){
-	  var opHtml = '<center><p><b>Welcome to TimeM.</b></p></center><div class="welcomeMsg">'+uname+'</div><div><input id="gotoAssign" type="button" value="My Assignments" name="GotoSubmit" class="btnsbmit"><input id="gotoDashboard" type="button" value="My Dashboard" name="GotoDash" class="btnsbmit"><input id="plogOut" type="button" value="Logout" name="Logout" class="btnsbmit"></div>';
+  if(uname != null && uname!=""){
+	  var opHtml = '<center><p><b>Welcome to TimeM.</b></p></center><div class="welcomeMsg">'+uname+'</div><div><input id="gotoAssign" type="button" value="My Assignments" name="GotoSubmit" class="btnsbmit"><input id="plogOut" type="button" value="Logout" name="Logout" class="btnsbmit"></div>';
 	  $('#containerMain').html(opHtml);
 	  
 	  $('#gotoAssign').on('click', function() {
@@ -10,21 +10,24 @@ $(document).ready(function() {
 			var newUrl = "http://192.185.184.192/~rgbastud/timem.github.io/assignments.html";
 			chrome.tabs.create({url: newUrl});
 		});
-	  $('#gotoDashboard').on('click', function() {
-			//console.log("User wants to sign up!");
-			var newUrl = "http://192.185.184.192/~rgbastud/timem.github.io/dashboard.html";
-			chrome.tabs.create({url: newUrl});
-		});
 	  $('#plogOut').on('click', function() {
 			//console.log("User wants to sign up!");
 			document.cookie="usernameext=";
 			$('#containerMain').html('<form name = "myform"><p><center><i class ="ion-locked" style= "font-size: 30px;"></i></center><center>Login:</center><input label="Email" id="username" type="text" name="username" placeholder ="PaulG" class="Emailwrap"></input><br/><br/><center>Password:</center><input label="***********" id="password" type="password" name="pword" placeholder="********"  class="Passwordwrap"><input id="signIn" type="button" value="Sign In" name="Submit" class="btnsbmit"></p></form><div id="containersignUp"> <a href="http://timem.github.io/registration.html" id="signUp"><center>Sign Up!</center></a></div>');
 		});
-	  return false;
+	  	//alert(uname);
+	  	/*chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":uname},function (cookie){
+			console.log(username);
+			console.log(JSON.stringify(cookie));
+			console.log(chrome.extension.lastError);
+			console.log(chrome.runtime.lastError);
+		});*/
+	  //return false;
   }
-  Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
+  
   // FUNCTION FOR SIGNING IN
   $('#signIn').on('click', function() {
+	Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
     console.log("check");
     console.log("username: " + $('#username').val());
     console.log("password: " + $('#password').val());
@@ -48,7 +51,9 @@ $(document).ready(function() {
         // If user inputs correct information
         console.log("Correct!!!");
         document.cookie="usernameext=" + username;
+		document.cookie="username=" + username;
 		chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":username},function (cookie){
+			console.log(username);
 			console.log(JSON.stringify(cookie));
 			console.log(chrome.extension.lastError);
 			console.log(chrome.runtime.lastError);

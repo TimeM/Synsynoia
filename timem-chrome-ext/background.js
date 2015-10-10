@@ -12,6 +12,8 @@ function init() {
 	}*/
 	//alert(localStorage.siteList);
 	localStorage.clear();
+	//localStorage.removeItem("siteList");
+	//chrome.cookies.remove({"url": "http://192.185.184.192/~rgbastud/timem.github.io/", "name": "SiteDetailsStr"}, function("SiteDetailsStr") { console.log("SiteDetailsStr"); });
 	localStorage.siteList = JSON.stringify({});
 	//alert(localStorage.siteList);
 	
@@ -28,6 +30,7 @@ function checkActivity() {
 		curTabId = tabs.tabId;
 		console.log("Tab changed - " + tabs.tabId);
 		updateInfo();
+		
 	});
 	
 	// Check for tabs updating
@@ -70,34 +73,68 @@ function updateInfo() {
 	if (curTabId == null) {
 		return;
 	} else {
-		// Get data from the current tab
-		console.debug("Update - " + curTabId);
-		chrome.tabs.get(curTabId, 
-		function(tab) { 
-			console.debug(tab);
-			// Get base URL
-			//alert(tab.url);
-			var theSite = getSite(tab.url);
-			// Check if its valid
-			if (theSite == null) {
-				console.log("URL issue");
-				return;
-			}
-			// Set site if doesnt exist yet
-			if (curSite == null) {
-				console.log("Setting new site - " + curSite);
-				startTime = new Date();
-				curSite = theSite;
-				return;
-			}
-			// If new site, update time spent
-			if (curSite != theSite) {
-				var diffTimeSec = ((new Date()).getTime() - startTime.getTime()) / 1000;
-				updateTime(curSite, diffTimeSec);
-				curSite = theSite;
-				startTime = new Date();
+		
+		//Getting timespect document coockie in background.js starts - Mahesh
+	
+		chrome.cookies.get({ url: 'http://192.185.184.192/~rgbastud/timem.github.io/', name: 'activeLapExt' },
+		  function (cookie) {
+			if (cookie) {
+			  var checkStatusString = unescape(cookie.value);
+			  var tmpArr = checkStatusString.split("~|~");
+			  console.debug("Button Status in Extension - " + tmpArr[3]);
+			  if(tmpArr[1]=="StartStop" && tmpArr[3]=="InProcess"){
+				  // Get data from the current tab
+					console.debug("Update - " + curTabId);
+					chrome.tabs.get(curTabId, 
+					function(tab) { 
+						console.debug(tab);
+						// Get base URL
+						var theSite = getSite(tab.url);
+						// Check if its valid
+						if (theSite == null) {
+							console.log("URL issue");
+							return;
+						}
+						// Set site if doesnt exist yet
+						if (curSite == null) {
+							console.log("Setting new site - " + curSite);
+							startTime = new Date();
+							curSite = theSite;
+							return;
+						}
+						// If new site, update time spent
+						if (curSite != theSite) {
+							var diffTimeSec = ((new Date()).getTime() - startTime.getTime()) / 1000;
+							updateTime(curSite, diffTimeSec);
+							curSite = theSite;
+							startTime = new Date();
+						}
+				   });
+			  }else if(tmpArr[3]=="Ended"){
+				  localStorage.clear();
+			  }
 			}
 		});
+		//Getting timespect document coockie in background.js ends - Mahesh
+		
+		//site list cookie starts here
+		  var siteList = JSON.parse(localStorage.siteList);
+		  // Create sorted list
+		  var sortedSites = new Array();
+		  // Generate sorted list
+		  for (theSite in siteList) {
+		   sortedSites.push([theSite, siteList[theSite]]);
+		  }
+		  // Sort sites by time
+		  sortedSites.sort(function(a, b) {return b[1] - a[1];});
+		
+		  
+		  // Store all details in coockies 
+		  var SiteDetStr = JSON.stringify(sortedSites)
+			chrome.cookies.set({"name":"SiteDetailsStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":SiteDetStr},function (cookie){
+				console.log(JSON.stringify(cookie));
+			});
+		//site list cookie ends here
 	}
 }
 
@@ -115,25 +152,20 @@ function getSite(url) {
 function updateTime(theSite, timeSeconds) {
 	console.log("Updating time " + theSite);
 	// get JSON file
-	//alert('Hello World');
 	var sites = JSON.parse(localStorage.siteList);
 	// Check to see if site exists already, if not save site and set time to 0.
 	if (!sites[theSite]) {
 		sites[theSite] = 0;
 	} 
+
 	// Update site by adding the number of seconds spent
 	sites[theSite] = sites[theSite] + timeSeconds;
 	console.log("Updating time - " + timeSeconds);
-	//alert("Updating time - " + timeSeconds);
+
 	// Write file as JSON
 	console.log("Updating time - writing file");
 	localStorage.siteList = JSON.stringify(sites);
-	//var siteListStr = localStorage.siteList;
-	chrome.cookies.set({"name":"siteListstr","url":"http://localhost/time_m/timem-dev/dashboard.html","value":localStorage.siteList},function (cookie){
-		console.log(JSON.stringify(cookie));
-		console.log(chrome.extension.lastError);
-		console.log(chrome.runtime.lastError);
-	});
 }
+
 
 init();
