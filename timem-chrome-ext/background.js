@@ -169,9 +169,11 @@ function getSite(url) {
 function updateTime(theSite, timeSeconds) {
 	console.log("Updating time " + theSite);
 	// get JSON file
-	var sites = JSON.parse(localStorage.siteList);
+	//var sites = JSON.parse(localStorage.siteList);
 	// Check to see if site exists already, if not save site and set time to 0.
-	if (!sites[theSite]) {
+	if(localStorage.siteList!=null){
+		sites = JSON.parse(localStorage.siteList);
+	}else{
 		sites[theSite] = 0;
 	} 
 
