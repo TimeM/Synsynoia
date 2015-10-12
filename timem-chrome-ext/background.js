@@ -81,11 +81,11 @@ function updateInfo() {
             
 			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
 				curLap = cookie.value;
-				console.log("Cookie Array-["+eventTimeTrackArrExt+"]");
-				console.log("Current Lap-["+curLap+"]");
-				console.log(eventTimeTrackArrExt[curLap][4]);
+				//console.log("Cookie Array-["+eventTimeTrackArrExt+"]");
+				//console.log("Current Lap-["+curLap+"]");
+				//console.log(eventTimeTrackArrExt[curLap][4]);
 				eventTimeTrackArrExt[curLap][4] = "SocialInProgress";
-				console.log(eventTimeTrackArrExt[curLap][4]);
+				//console.log(eventTimeTrackArrExt[curLap][4]);
 				var arrString = JSON.stringify(eventTimeTrackArrExt);
 				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
 					console.log("Cookie value changed for social tracking");
@@ -177,7 +177,33 @@ function updateTime(theSite, timeSeconds) {
 
 	// Update site by adding the number of seconds spent
 	sites[theSite] = sites[theSite] + timeSeconds;
-	console.log("Updating time - " + timeSeconds);
+	
+	//updating time spent on social sites in lap array starts - Mahesh
+	var urlParts = theSite.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/);
+	var urlParts1 = urlParts[0].split(".");
+	var siteDomain = urlParts1[0];
+	var trackingSites = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
+	console.log(siteDomain+"::"+trackingSites.indexOf(siteDomain));
+	if(trackingSites.indexOf(siteDomain) != -1){
+		chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'eventTimeTrackArrStr'}, function(cookie) {
+            arrayString = cookie.value;
+			var eventTimeTrackArrExt = JSON.parse(decodeURIComponent(arrayString));
+            
+			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
+				curLap = cookie.value;
+				console.log("Time spent - Before:"+eventTimeTrackArrExt[curLap][5]);
+				eventTimeTrackArrExt[curLap][5] = parseInt(eventTimeTrackArrExt[curLap][5])+timeSeconds;
+				console.log("Time spent - After:"+eventTimeTrackArrExt[curLap][5]);
+				var arrString = JSON.stringify(eventTimeTrackArrExt);
+				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
+					console.log("Time spent on SS added in the Lap Arrap");
+				});
+			})
+        });		
+	}
+	//updating time spent on social sites in lap array ends - Mahesh
+	
+	console.log("Updating time spent - " + timeSeconds);
 
 	// Write file as JSON
 	console.log("Updating time - writing file");
