@@ -75,7 +75,24 @@ function updateInfo() {
 	} else {
 		
 		//Getting timespect document coockie in background.js starts - Mahesh
-	
+		chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'eventTimeTrackArrStr'}, function(cookie) {
+            arrayString = cookie.value;
+			var eventTimeTrackArrExt = JSON.parse(decodeURIComponent(arrayString));
+            
+			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
+				curLap = cookie.value;
+				console.log("Cookie Array-["+eventTimeTrackArrExt+"]");
+				console.log("Current Lap-["+curLap+"]");
+				console.log(eventTimeTrackArrExt[curLap][4]);
+				eventTimeTrackArrExt[curLap][4] = "SocialInProgress";
+				console.log(eventTimeTrackArrExt[curLap][4]);
+				var arrString = JSON.stringify(eventTimeTrackArrExt);
+				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
+					console.log("Cookie value changed for social tracking");
+				});
+			})
+        });
+		
 		chrome.cookies.get({ url: 'http://192.185.184.192/~rgbastud/timem.github.io/', name: 'activeLapExt' },
 		  function (cookie) {
 			if (cookie) {
