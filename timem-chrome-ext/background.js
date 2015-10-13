@@ -90,6 +90,9 @@ function updateInfo() {
 				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
 					console.log("Cookie value changed for social tracking");
 				});
+				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":arrString},function (cookie){
+					console.log("Cookie value changed for social tracking");
+				});
 			})
         });
 		
@@ -151,6 +154,9 @@ function updateInfo() {
 			chrome.cookies.set({"name":"SiteDetailsStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":SiteDetStr},function (cookie){
 				console.log(JSON.stringify(cookie));
 			});
+			chrome.cookies.set({"name":"SiteDetailsStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":SiteDetStr},function (cookie){
+				console.log(JSON.stringify(cookie));
+			});
 		//site list cookie ends here
 	}
 }
@@ -194,10 +200,14 @@ function updateTime(theSite, timeSeconds) {
 			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
 				curLap = cookie.value;
 				console.log("Time spent - Before:"+eventTimeTrackArrExt[curLap][5]);
+				eventTimeTrackArrExt[curLap][4] = "SocialInProgress";
 				eventTimeTrackArrExt[curLap][5] = parseInt(eventTimeTrackArrExt[curLap][5])+timeSeconds;
 				console.log("Time spent - After:"+eventTimeTrackArrExt[curLap][5]);
 				var arrString = JSON.stringify(eventTimeTrackArrExt);
 				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
+					console.log("Time spent on SS added in the Lap Arrap");
+				});
+				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":arrString},function (cookie){
 					console.log("Time spent on SS added in the Lap Arrap");
 				});
 			})

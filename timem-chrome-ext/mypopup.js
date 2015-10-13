@@ -56,9 +56,9 @@ $(document).ready(function() {
 		document.cookie="username=" + username;
 		chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":username},function (cookie){
 			console.log(username);
-			console.log(JSON.stringify(cookie));
-			console.log(chrome.extension.lastError);
-			console.log(chrome.runtime.lastError);
+		});
+		chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":username},function (cookie){
+			console.log(username);
 		});
 		var outputDiv = document.getElementById("containerMain");
 		outputDiv.innerHTML = username;
