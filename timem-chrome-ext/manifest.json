@@ -24,6 +24,13 @@
   "permissions": [
     "tabs",
 	"cookies",
-	"<all_urls>"
+	"<all_urls>",
+	"management"
+  ],
+  "externally_connectable" :{
+    "matches": ["*://localhost/*", "*://192.185.184.192/~rgbastud/timem.github.io/*"]
+  },
+  "web_accessible_resources": [
+    "news3.png"
   ]
 }
