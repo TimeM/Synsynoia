@@ -14,17 +14,13 @@ $(document).ready(function() {
 			//console.log("User wants to sign up!");
 			document.cookie="usernameext=";
 			$('#containerMain').html('<form name = "myform"><p><center><i class ="ion-locked" style= "font-size: 30px;"></i></center><center>Login:</center><input label="Email" id="username" type="text" name="username" placeholder ="PaulG" class="Emailwrap"></input><br/><br/><center>Password:</center><input label="***********" id="password" type="password" name="pword" placeholder="********"  class="Passwordwrap"><input id="signIn" type="button" value="Sign In" name="Submit" class="btnsbmit"></p></form><div id="containersignUp"> <a href="http://timem.github.io/registration.html" id="signUp"><center>Sign Up!</center></a></div>');
-			//chrome.tabs.remove({url: newUrl});
-			//window.close();
+
+			//changing url to home after logout
+			chrome.tabs.query({url: "http://192.185.184.192/~rgbastud/timem.github.io/assignments.html"}, function(tabs) {
+				var tabURL = tabs[0].url;
+				chrome.tabs.update(tabs[0].id, {url: "http://192.185.184.192/~rgbastud/timem.github.io/"});
+			});
 		});
-	  	//alert(uname);
-	  	/*chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":uname},function (cookie){
-			console.log(username);
-			console.log(JSON.stringify(cookie));
-			console.log(chrome.extension.lastError);
-			console.log(chrome.runtime.lastError);
-		});*/
-	  //return false;
   }
   
   // FUNCTION FOR SIGNING IN
