@@ -9,6 +9,7 @@ function init() {
 	chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) {
 		usname = cookie.value;
 		if(usname.indexOf("@") > 0 && usname.indexOf(".")){
+			console.log("Username and local storage exists check: "+localStorage.siteList+"::"+usname);
 			if(!localStorage.siteList) {
 				localStorage.siteList = JSON.stringify({});
 			}else{
@@ -22,12 +23,6 @@ function init() {
 		}
 		
 	})
-	console.log("1. localStorage.siteList:"+localStorage.siteList);
-	
-	//localStorage.removeItem("siteList");
-	//chrome.cookies.remove({"url": "http://192.185.184.192/~rgbastud/timem.github.io/", "name": "SiteDetailsStr"}, function("SiteDetailsStr") { console.log("SiteDetailsStr"); });
-	
-	//alert(localStorage.siteList);
 	
 	// Check for activity changes
 	checkActivity();
@@ -55,7 +50,6 @@ function checkActivity() {
 	});
 	
 	// Query info for tabs.query
-	// As per https://developer.chrome.com/extensions/tabs#method-query
 	var queryInfo = {
 		active: true,
 		currentWindow: true
