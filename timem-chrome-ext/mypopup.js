@@ -2,6 +2,9 @@ $(document).ready(function() {
   uname = readCookie("usernameext");
   //alert(uname);
   if(uname != null && uname!=""){
+	  chrome.cookies.set({"name":"username","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":uname},function (cookie){
+			console.log(username);
+	 });
 	  var opHtml = '<center><p><b>Welcome to TimeM.</b></p></center><div class="welcomeMsg">'+uname+'</div><div><input id="gotoAssign" type="button" value="My Assignments" name="GotoSubmit" class="btnsbmit"><input id="plogOut" type="button" value="Logout" name="Logout" class="btnsbmit"></div>';
 	  $('#containerMain').html(opHtml);
 	  
