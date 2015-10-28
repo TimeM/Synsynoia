@@ -6,23 +6,10 @@ var curSite = null; // the site base url
 // Initialize storage variables and check for activity of tabs/windows
 function init() {
 	console.log("Initialize");
-	chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) {
-		usname = cookie.value;
-		if(usname.indexOf("@") > 0 && usname.indexOf(".")){
-			console.log("Username and local storage exists check: "+localStorage.siteList+"::"+usname);
-			if(!localStorage.siteList) {
-				localStorage.siteList = JSON.stringify({});
-			}else{
-				console.log("1. localStorage.siteList:"+localStorage.siteList);
-			}
-			//localStorage.siteList = JSON.stringify({});
-			console.log("username in extension:"+usname);
-		}else{
-			localStorage.clear();
-			console.log("Username does not exists.");
-		}
-		
-	})
+	
+	if(!localStorage.siteList) {
+		localStorage.siteList = JSON.stringify({});
+	}
 	
 	// Check for activity changes
 	checkActivity();
@@ -79,98 +66,33 @@ function updateInfo() {
 	if (curTabId == null) {
 		return;
 	} else {
-		
-		//Getting timespect document coockie in background.js starts - Mahesh
-		chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'eventTimeTrackArrStr'}, function(cookie) {
-            arrayString = cookie.value;
-			var eventTimeTrackArrExt = JSON.parse(decodeURIComponent(arrayString));
-            
-			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
-				curLap = cookie.value;
-				//console.log("Cookie Array-["+eventTimeTrackArrExt+"]");
-				console.log("Current Lap-["+curLap+"]");
-				//console.log(eventTimeTrackArrExt[curLap][4]);
-				eventTimeTrackArrExt[curLap][4] = "InProgress";
-				//console.log(eventTimeTrackArrExt[curLap][4]);
-				var arrString = JSON.stringify(eventTimeTrackArrExt);
-				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
-					console.log("Cookie value changed for general Tracking");
-				});
-				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":arrString},function (cookie){
-					console.log("Cookie value changed for general Tracking");
-				});
-			})
-        });
-		
-		chrome.cookies.get({ url: 'http://192.185.184.192/~rgbastud/timem.github.io/', name: 'activeLapExt' },
-		  function (cookie) {
-			if (cookie) {
-			  var checkStatusString = unescape(cookie.value);
-			  var tmpArr = checkStatusString.split("~|~");
-			  console.debug("Button Status in Extension - " + tmpArr[3]);
-			  if(tmpArr[1]=="StartStop" && tmpArr[3]=="InProcess"){
-				  // Get data from the current tab
-					console.debug("Update - " + curTabId);
-					chrome.tabs.get(curTabId, 
-					function(tab) { 
-						console.debug(tab);
-						// Get base URL
-						var theSite = getSite(tab.url);
-						// Check if its valid
-						if (theSite == null) {
-							console.log("URL issue");
-							return;
-						}
-						// Set site if doesnt exist yet
-						if (curSite == null) {
-							console.log("Setting new site - " + curSite);
-							startTime = new Date();
-							curSite = theSite;
-							return;
-						}
-						// If new site, update time spent
-						if (curSite != theSite) {
-							var diffTimeSec = ((new Date()).getTime() - startTime.getTime()) / 1000;
-							updateTime(curSite, diffTimeSec);
-							curSite = theSite;
-							startTime = new Date();
-						}
-				   });
-			  }else if(tmpArr[3]=="Ended"){
-				  localStorage.clear();
-			  }
+		// Get data from the current tab
+		console.debug("Update - " + curTabId);
+		chrome.tabs.get(curTabId, 
+		function(tab) { 
+			console.debug(tab);
+			// Get base URL
+			var theSite = getSite(tab.url);
+			// Check if its valid
+			if (theSite == null) {
+				console.log("URL issue");
+				return;
+			}
+			// Set site if doesnt exist yet
+			if (curSite == null) {
+				console.log("Setting new site - " + curSite);
+				startTime = new Date();
+				curSite = theSite;
+				return;
+			}
+			// If new site, update time spent
+			if (curSite != theSite) {
+				var diffTimeSec = ((new Date()).getTime() - startTime.getTime()) / 1000;
+				updateTime(curSite, diffTimeSec);
+				curSite = theSite;
+				startTime = new Date();
 			}
 		});
-		//Getting timespect document coockie in background.js ends - Mahesh
-		
-		//site list cookie starts here
-		  console.log("2. localStorage.siteList:"+localStorage.siteList);
-		  /*if(localStorage.siteList){
-		  	var siteList = JSON.parse(localStorage.siteList);
-		  }else{
-			var siteList = new Array();
-		  }*/
-		  var siteList = JSON.parse(localStorage.siteList);
-		  console.log("siteList:"+siteList);
-		  // Create sorted list
-		  var sortedSites = new Array();
-		  // Generate sorted list
-		  for (theSite in siteList) {
-		   sortedSites.push([theSite, siteList[theSite]]);
-		  }
-		  // Sort sites by time
-		  sortedSites.sort(function(a, b) {return b[1] - a[1];});
-		
-		  
-		  // Store all details in coockies 
-		  var SiteDetStr = JSON.stringify(sortedSites)
-			chrome.cookies.set({"name":"SiteDetailsStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":SiteDetStr},function (cookie){
-				console.log(JSON.stringify(cookie));
-			});
-			chrome.cookies.set({"name":"SiteDetailsStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":SiteDetStr},function (cookie){
-				console.log(JSON.stringify(cookie));
-			});
-		//site list cookie ends here
 	}
 }
 
@@ -185,14 +107,12 @@ function getSite(url) {
 }
 
 // Update the time spent on a site
-function updateTime(theSite, timeSeconds) {
+function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
 	console.log("Updating time " + theSite);
 	// get JSON file
-	//var sites = JSON.parse(localStorage.siteList);
+	var sites = JSON.parse(localStorage.siteList);
 	// Check to see if site exists already, if not save site and set time to 0.
-	if(localStorage.siteList!=null){
-		sites = JSON.parse(localStorage.siteList);
-	}else{
+	if (!sites[theSite]) {
 		sites[theSite] = 0;
 	} 
 
@@ -203,28 +123,92 @@ function updateTime(theSite, timeSeconds) {
 	var urlParts = theSite.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/);
 	var urlParts1 = urlParts[0].split(".");
 	var siteDomain = urlParts1[0];
-	var trackingSites = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
-	console.log(siteDomain+"::"+trackingSites.indexOf(siteDomain));
-	if(trackingSites.indexOf(siteDomain) != -1){
-		chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'eventTimeTrackArrStr'}, function(cookie) {
-            arrayString = cookie.value;
-			var eventTimeTrackArrExt = JSON.parse(decodeURIComponent(arrayString));
-            
-			chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'currentLap'}, function(cookie) {
-				curLap = cookie.value;
-				console.log("Time spent - Before:"+eventTimeTrackArrExt[curLap][5]);
-				eventTimeTrackArrExt[curLap][4] = "SocialInProgress";
-				eventTimeTrackArrExt[curLap][5] = parseInt(eventTimeTrackArrExt[curLap][5])+timeSeconds;
-				console.log("Time spent - After:"+eventTimeTrackArrExt[curLap][5]);
-				var arrString = JSON.stringify(eventTimeTrackArrExt);
-				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":arrString},function (cookie){
-					console.log("Time spent on SS added in the Lap Array");
-				});
-				chrome.cookies.set({"name":"eventTimeTrackArrStr","url":"http://192.185.184.192/~rgbastud/timem.github.io/load_timer.html","value":arrString},function (cookie){
-					console.log("Time spent on SS added in the Lap Array");
-				});
-			})
-        });		
+	var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
+	console.log(siteDomain+"::"+trackingSitesList.indexOf(siteDomain));
+	if(trackingSitesList.indexOf(siteDomain) != -1){
+		Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
+		chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) {
+			usname = cookie.value;
+			if(usname.indexOf("@") > 0 && usname.indexOf(".")){
+				console.log("Username in background.js:"+usname);
+				var query = new Parse.Query("LoginDetails");
+				query.equalTo("UserName", usname);
+				query.descending("SessionStartedOn");
+				query.first({
+				   success: function(result){
+						var currentSessionObjId = result.id;
+						console.log("Last Lap Details from parse-"+result.get("LastLapDetails"));
+						var lastActiveLap = $.parseJSON(result.get("LastLapDetails"));
+						var lastButtonActiveMode = lastActiveLap.buttonMode;
+						console.log("lastButtonActiveMode:"+lastButtonActiveMode);
+						if(lastActiveLap.lapStatus == "InProcess"){
+							var e = new Date().getTime();
+							var newbandDetails = {};
+							newbandDetails.title = "Study";
+							var stTime = lastActiveLap.startTime;
+							newbandDetails.timeSpent = e - parseInt(stTime);
+							if(result.get("LapData")){
+								var objLapData = $.parseJSON(result.get("LapData"));
+								objLapData.push(newbandDetails);
+								var objLapDataString = JSON.stringify(objLapData);
+							}else{
+								var objLapData = [];
+								objLapData.push(newbandDetails);
+								var objLapDataString = JSON.stringify(objLapData);
+							}
+							
+							var lapUpdateClass = Parse.Object.extend("LoginDetails");
+							var lapUpdate = new lapUpdateClass();
+							lapUpdate.id = currentSessionObjId;
+						
+							lapUpdate.set("LapData",objLapDataString);
+							// Save
+							lapUpdate.save(null, {
+							  success: function(lapUpdate) {
+								// Saved successfully.
+								var lastActiveLap = {};
+								lastActiveLap.buttonMode = lastButtonActiveMode;
+								lastActiveLap.lapStatus = "SocialInProgress";
+								s = new Date().getTime();
+								lastActiveLap.startTime = s;
+								var tmpStringifyStr = JSON.stringify(lastActiveLap);
+								
+								var lapUpdateClass = Parse.Object.extend("LoginDetails");
+								var lapUpdate = new lapUpdateClass();
+								lapUpdate.id = currentSessionObjId;
+							
+								lapUpdate.set("LastLapDetails",tmpStringifyStr);
+								// Save
+								lapUpdate.save(null, {
+								  success: function(lapUpdate) {
+									// Saved successfully.
+									console.log("LastLapDetails Updated Successfully");	
+								  },
+								  error: function(point, error) {
+									// The save failed.
+									console.log("LastLapDetails Update failed");
+								  }
+								});								
+								console.log("LapData Updated Successfully");	
+							  },
+							  error: function(point, error) {
+								// The save failed.
+								console.log("LapData Update failed");
+							  }
+							});
+						}
+						
+				   },
+				   error: function(){
+					   console.log('Parse Error');
+				   },
+				
+				})				
+			}else{
+				console.log("Username does not exists.");
+			}
+			
+		})				
 	}
 	//updating time spent on social sites in lap array ends - Mahesh
 	
