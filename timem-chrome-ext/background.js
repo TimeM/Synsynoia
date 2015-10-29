@@ -138,6 +138,7 @@ function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
 				   success: function(result){
 						var currentSessionObjId = result.id;
 						console.log("Last Lap Details from parse-"+result.get("LastLapDetails"));
+						var socialSitesTimeParse = result.get("SocialSitesTime");
 						var lastActiveLap = $.parseJSON(result.get("LastLapDetails"));
 						var lastButtonActiveMode = lastActiveLap.buttonMode;
 						console.log("lastButtonActiveMode:"+lastButtonActiveMode);
@@ -182,7 +183,7 @@ function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
 								lapUpdate.save(null, {
 								  success: function(lapUpdate) {
 									// Saved successfully.
-									console.log("LastLapDetails Updated Successfully");	
+									console.log("LastLapDetails Updated Successfully");
 								  },
 								  error: function(point, error) {
 									// The save failed.
@@ -197,7 +198,7 @@ function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
 							  }
 							});
 						}
-						
+						updateSocialTrackingArray(currentSessionObjId,socialSitesTimeParse,siteDomain,timeSeconds);						
 				   },
 				   error: function(){
 					   console.log('Parse Error');
@@ -219,5 +220,44 @@ function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
 	localStorage.siteList = JSON.stringify(sites);
 }
 
+function updateSocialTrackingArray(currentSessionObjId,socialTimeParse,siteDomain,timeSeconds){
+	console.log("updateSocialTrackingArray - currentSessionObjId:"+currentSessionObjId+"||socialTimeParse:"+socialTimeParse+"||siteDomain:"+siteDomain+"||timeSeconds:"+timeSeconds);
+	if(typeof socialTimeParse == 'undefined' || socialTimeParse == ''){
+		var trackingSites = {};
+		trackingSites.facebook = 0;
+		trackingSites.yahoo = 0;
+		trackingSites.youtube = 0;
+		trackingSites.twitter = 0;
+		trackingSites.instagram = 0;
+		trackingSites.tumblr = 0;
+		trackingSites.dailymotion = 0;
+		trackingSites.pinterest = 0;
+		trackingSites.vine = 0;
+		trackingSites[siteDomain] = timeSeconds;
+		trackingSitesString = JSON.stringify(trackingSites);		
+	}else{
+		console.log("array undefined");
+		trackingSites = $.parseJSON(socialTimeParse);
+		trackingSites[siteDomain] = parseInt(trackingSites[siteDomain]) + parseInt(timeSeconds);
+		trackingSitesString = JSON.stringify(trackingSites);
+	}
+	Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
+	var lapUpdateClass = Parse.Object.extend("LoginDetails");
+	var lapUpdate = new lapUpdateClass();
+	lapUpdate.id = currentSessionObjId;
+
+	lapUpdate.set("SocialSitesTime",trackingSitesString);
+	// Save
+	lapUpdate.save(null, {
+	  success: function(lapUpdate) {
+		// Saved successfully.
+		console.log("Social Time Updated Successfully");
+	  },
+	  error: function(point, error) {
+		// The save failed.
+		console.log("Social Time Update failed");
+	  }
+	});
+}
 
 init();
