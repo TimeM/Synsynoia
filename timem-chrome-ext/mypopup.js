@@ -104,7 +104,8 @@ $(document).ready(function() {
 		
 		//Create record for parse loginDetails
 		var blankObj = JSON.stringify({});
-		var blankObjLapData = JSON.stringify({"title":"Blank","timeSpent":0})
+		var objLapData = [{"title":"Blank","timeSpent":0}];
+		var blankObjLapData = JSON.stringify(objLapData);
 		var trackingSites = {facebook:0, yahoo:0, youtube:0, twitter:0,instagram:0,tumblr:0,dailymotion:0,pinterest:0,vine:0};
 		trackingSitesString = JSON.stringify(trackingSites);
 		var loginDetailsClass = Parse.Object.extend("LoginDetails");
