@@ -98,12 +98,23 @@ $(document).ready(function() {
 			console.log(username);
 		});
 		
+	  chrome.cookies.set({"name":"showSettings","url":"http://192.185.184.192/~rgbastud/timem.github.io/assignments.html","value":"1"},function (cookie){
+			console.log("Show Settings Initialised");
+	 });		
+		
 		//Create record for parse loginDetails
+		var blankObj = JSON.stringify({});
+		var blankObjLapData = JSON.stringify({"title":"Blank","timeSpent":0})
+		var trackingSites = {facebook:0, yahoo:0, youtube:0, twitter:0,instagram:0,tumblr:0,dailymotion:0,pinterest:0,vine:0};
+		trackingSitesString = JSON.stringify(trackingSites);
 		var loginDetailsClass = Parse.Object.extend("LoginDetails");
 		var loginDetails = new loginDetailsClass();
 		n = new Date().getTime();
 		loginDetails.set("UserName",username);
 		loginDetails.set("SessionStartedOn",n);
+		loginDetails.set("LapData",blankObjLapData);
+		loginDetails.set("LastLapDetails",blankObj);
+		loginDetails.set("SocialSitesTime",trackingSitesString);
 				
 		loginDetails.save(null,{
 		  success:function(loginDetails) { 
