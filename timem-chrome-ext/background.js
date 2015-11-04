@@ -5,7 +5,7 @@ var curSite = null; // the site base url
 
 // Initialize storage variables and check for activity of tabs/windows
 function init() {
-	console.log("Initialize");
+	//console.log("Initialize");
 	
 	if(!localStorage.siteList) {
 		localStorage.siteList = JSON.stringify({});
@@ -17,7 +17,7 @@ function init() {
 
 // Check for activity of tabs/windows and updates variables correctly
 function checkActivity() {
-	console.log("checkActivity initialized");
+	//console.log("checkActivity initialized");
 	// Check for changing tab
 	chrome.tabs.onActivated.addListener(
 	function(tabs) {
@@ -73,6 +73,92 @@ function updateInfo() {
 			console.debug(tab);
 			// Get base URL
 			var theSite = getSite(tab.url);
+			var curURL = tab.url;
+			//Stop Social Band if returned to assignment page ->
+			if(curURL.indexOf("assignments.html") != -1){
+				Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
+				chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) {
+					usname = cookie.value;
+					if(usname.indexOf("@") > 0 && usname.indexOf(".")){
+						var query = new Parse.Query("LoginDetails");
+						query.equalTo("UserName", usname);
+						query.descending("SessionStartedOn");
+						query.first({
+						   success: function(result){
+								var currentSessionObjId = result.id;
+								var socialSitesTimeParse = result.get("SocialSitesTime");
+								var lastActiveLap = $.parseJSON(result.get("LastLapDetails"));
+								var lastButtonActiveMode = lastActiveLap.buttonMode;
+								if(lastActiveLap.lapStatus == "SocialInProgress"){
+									var e = new Date().getTime();
+									var newbandDetails = {};
+									newbandDetails.title = "SocialSites";
+									var stTime = lastActiveLap.startTime;
+									newbandDetails.timeSpent = e - parseInt(stTime);
+									if(result.get("LapData")){
+										var objLapData = $.parseJSON(result.get("LapData"));
+										objLapData.push(newbandDetails);
+										var objLapDataString = JSON.stringify(objLapData);
+									}else{
+										var objLapData = [];
+										objLapData.push(newbandDetails);
+										var objLapDataString = JSON.stringify(objLapData);
+									}
+									
+									var lapUpdateClass = Parse.Object.extend("LoginDetails");
+									var lapUpdate = new lapUpdateClass();
+									lapUpdate.id = currentSessionObjId;
+								
+									lapUpdate.set("LapData",objLapDataString);
+									// Save
+									lapUpdate.save(null, {
+									  success: function(lapUpdate) {
+										// Saved successfully.
+										var lastActiveLap = {};
+										lastActiveLap.buttonMode = lastButtonActiveMode;
+										lastActiveLap.lapStatus = "InProcess";
+										s = new Date().getTime();
+										lastActiveLap.startTime = s;
+										var tmpStringifyStr = JSON.stringify(lastActiveLap);
+										
+										var lapUpdateClass = Parse.Object.extend("LoginDetails");
+										var lapUpdate = new lapUpdateClass();
+										lapUpdate.id = currentSessionObjId;
+									
+										lapUpdate.set("LastLapDetails",tmpStringifyStr);
+										// Save
+										lapUpdate.save(null, {
+										  success: function(lapUpdate) {
+											// Saved successfully.
+											console.log("LastLapDetails Updated Successfully");
+										  },
+										  error: function(point, error) {
+											// The save failed.
+											console.log("LastLapDetails Update failed");
+										  }
+										});								
+										console.log("LapData Updated Successfully");	
+									  },
+									  error: function(point, error) {
+										// The save failed.
+										console.log("LapData Update failed");
+									  }
+									});
+								}
+						   },
+						   error: function(){
+							   console.log('Parse Error');
+						   },
+						
+						})				
+					}else{
+						console.log("Username does not exists.");
+					}
+					
+				})					
+			}
+			//Stop Social Band if returned to assignment page ends
+			
 			// Check if its valid
 			if (theSite == null) {
 				console.log("URL issue");
@@ -107,7 +193,7 @@ function getSite(url) {
 }
 
 // Update the time spent on a site
-function updateTime(theSite, timeSeconds,curLapObjId,curLapTimeSpent) {
+function updateTime(theSite, timeSeconds) {
 	console.log("Updating time " + theSite);
 	// get JSON file
 	var sites = JSON.parse(localStorage.siteList);
