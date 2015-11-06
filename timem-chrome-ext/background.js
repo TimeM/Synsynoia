@@ -74,25 +74,37 @@ function updateInfo() {
 			// Get base URL
 			var theSite = getSite(tab.url);
 			var curURL = tab.url;
-			//Stop Social Band if returned to assignment page ->
-			if(curURL.indexOf("assignments.html") != -1){
-				Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
-				chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) {
+			//Stop Social Band if returned to assignment page -->
+				var urlParts = curURL.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/);
+				var urlParts1 = urlParts[0].split(".");
+				var siteDomain = urlParts1[0];
+				var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
+				
+				Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9"); 
+				chrome.cookies.get({"url": 'http://192.185.184.192/~rgbastud/timem.github.io/', "name": 'username'}, function(cookie) { //Cookie access starts A1
 					usname = cookie.value;
 					if(usname.indexOf("@") > 0 && usname.indexOf(".")){
 						var query = new Parse.Query("LoginDetails");
 						query.equalTo("UserName", usname);
 						query.descending("SessionStartedOn");
-						query.first({
+						query.first({ //Parse Instance Starts A1
 						   success: function(result){
 								var currentSessionObjId = result.id;
 								var socialSitesTimeParse = result.get("SocialSitesTime");
 								var lastActiveLap = $.parseJSON(result.get("LastLapDetails"));
 								var lastButtonActiveMode = lastActiveLap.buttonMode;
-								if(lastActiveLap.lapStatus == "SocialInProgress"){
+								console.log("6th November");
+								console.log(curURL.indexOf("assignments.html"));
+								console.log(trackingSitesList.indexOf(siteDomain));
+								console.log(lastActiveLap.lapStatus);
+								if(curURL.indexOf("assignments.html") != -1 && lastActiveLap.lapStatus == "SocialInProgress"){
+									var newBandTitle = "SocialSites";
+									var newlapStatus = "InProcess";
+									s = new Date().getTime();
+									//Update Lap details in parse starts -->
 									var e = new Date().getTime();
 									var newbandDetails = {};
-									newbandDetails.title = "SocialSites";
+									newbandDetails.title = newBandTitle;
 									var stTime = lastActiveLap.startTime;
 									newbandDetails.timeSpent = e - parseInt(stTime);
 									if(result.get("LapData")){
@@ -115,9 +127,10 @@ function updateInfo() {
 									  success: function(lapUpdate) {
 										// Saved successfully.
 										var lastActiveLap = {};
+										console.log("06th Nov 2015-"+newlapStatus);
 										lastActiveLap.buttonMode = lastButtonActiveMode;
-										lastActiveLap.lapStatus = "InProcess";
-										s = new Date().getTime();
+										lastActiveLap.lapStatus = newlapStatus;
+										
 										lastActiveLap.startTime = s;
 										var tmpStringifyStr = JSON.stringify(lastActiveLap);
 										
@@ -144,20 +157,80 @@ function updateInfo() {
 										console.log("LapData Update failed");
 									  }
 									});
+									//Update Lap details in parse ends <--
+								}else if(trackingSitesList.indexOf(siteDomain) != -1 && lastActiveLap.lapStatus == "InProcess"){
+									var newBandTitle = "Study";
+									var newlapStatus = "SocialInProgress";
+									s = new Date().getTime();
+									var e = new Date().getTime();
+									var newbandDetails = {};
+									newbandDetails.title = newBandTitle;
+									var stTime = lastActiveLap.startTime;
+									newbandDetails.timeSpent = e - parseInt(stTime);
+									if(result.get("LapData")){
+										var objLapData = $.parseJSON(result.get("LapData"));
+										objLapData.push(newbandDetails);
+										var objLapDataString = JSON.stringify(objLapData);
+									}else{
+										var objLapData = [];
+										objLapData.push(newbandDetails);
+										var objLapDataString = JSON.stringify(objLapData);
+									}
+									
+									var lapUpdateClass = Parse.Object.extend("LoginDetails");
+									var lapUpdate = new lapUpdateClass();
+									lapUpdate.id = currentSessionObjId;
+								
+									lapUpdate.set("LapData",objLapDataString);
+									// Save
+									lapUpdate.save(null, {
+									  success: function(lapUpdate) {
+										// Saved successfully.
+										var lastActiveLap = {};
+										console.log("06th Nov 2015-"+newlapStatus);
+										lastActiveLap.buttonMode = lastButtonActiveMode;
+										lastActiveLap.lapStatus = newlapStatus;
+										
+										lastActiveLap.startTime = s;
+										var tmpStringifyStr = JSON.stringify(lastActiveLap);
+										
+										var lapUpdateClass = Parse.Object.extend("LoginDetails");
+										var lapUpdate = new lapUpdateClass();
+										lapUpdate.id = currentSessionObjId;
+									
+										lapUpdate.set("LastLapDetails",tmpStringifyStr);
+										// Save
+										lapUpdate.save(null, {
+										  success: function(lapUpdate) {
+											// Saved successfully.
+											console.log("LastLapDetails Updated Successfully");
+										  },
+										  error: function(point, error) {
+											// The save failed.
+											console.log("LastLapDetails Update failed");
+										  }
+										});								
+										console.log("LapData Updated Successfully");	
+									  },
+									  error: function(point, error) {
+										// The save failed.
+										console.log("LapData Update failed");
+									  }
+									});
+									//Update Lap details in parse ends <--
 								}
 						   },
 						   error: function(){
 							   console.log('Parse Error');
 						   },
 						
-						})				
+						}) //Parse Instance Ends A1				
 					}else{
 						console.log("Username does not exists.");
 					}
 					
-				})					
-			}
-			//Stop Social Band if returned to assignment page ends
+				})//Cookie access ends A1			
+			//Stop Social Band if returned to assignment page ends <--
 			
 			// Check if its valid
 			if (theSite == null) {
