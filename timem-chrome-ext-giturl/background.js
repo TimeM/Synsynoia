@@ -279,28 +279,28 @@ function updateTime(theSite, timeSeconds) {
 	sites[theSite] = sites[theSite] + timeSeconds;
 	
 	//updating time spent on social sites in lap array starts - Mahesh
-	var urlParts = theSite.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/);
+	/*var urlParts = theSite.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/);
 	var urlParts1 = urlParts[0].split(".");
-	var siteDomain = urlParts1[0];
+	var siteDomain = urlParts1[0];*/
+	
+	var siteDomain = getDomain(theSite);
+	console.log(siteDomain);
 	var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
-	console.log(siteDomain+"::"+trackingSitesList.indexOf(siteDomain));
+
 	if(trackingSitesList.indexOf(siteDomain) != -1){
 		Parse.initialize("LcQYRvseB9ExXGIherTt1v2pw2MVzPFwVXfigo11", "F5enB5XfOfqo4ReAItZCkJVxOY76hoveZrOMwih9");
 		chrome.cookies.get({"url": 'http://timem.github.io/', "name": 'username'}, function(cookie) {
 			usname = cookie.value;
 			if(usname.indexOf("@") > 0 && usname.indexOf(".")){
-				console.log("Username in background.js:"+usname);
 				var query = new Parse.Query("LoginDetails");
 				query.equalTo("UserName", usname);
 				query.descending("SessionStartedOn");
 				query.first({
 				   success: function(result){
 						var currentSessionObjId = result.id;
-						console.log("Last Lap Details from parse-"+result.get("LastLapDetails"));
 						var socialSitesTimeParse = result.get("SocialSitesTime");
 						var lastActiveLap = $.parseJSON(result.get("LastLapDetails"));
 						var lastButtonActiveMode = lastActiveLap.buttonMode;
-						console.log("lastButtonActiveMode:"+lastButtonActiveMode);
 						if(lastActiveLap.lapStatus == "InProcess"){
 							var e = new Date().getTime();
 							var newbandDetails = {};
@@ -380,7 +380,8 @@ function updateTime(theSite, timeSeconds) {
 }
 
 function updateSocialTrackingArray(currentSessionObjId,socialTimeParse,siteDomain,timeSeconds){
-	console.log("updateSocialTrackingArray - currentSessionObjId:"+currentSessionObjId+"||socialTimeParse:"+socialTimeParse+"||siteDomain:"+siteDomain+"||timeSeconds:"+timeSeconds);
+	
+	var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
 	if(typeof socialTimeParse == 'undefined' || socialTimeParse == ''){
 		var trackingSites = {};
 		trackingSites.facebook = 0;
@@ -417,6 +418,37 @@ function updateSocialTrackingArray(currentSessionObjId,socialTimeParse,siteDomai
 		console.log("Social Time Update failed");
 	  }
 	});
+}
+
+function getDomain(url) {
+    var hostName = getHostName(url);
+    var domain = hostName;
+    
+    if (hostName != null) {
+        var parts = hostName.split('.').reverse();
+        
+    if (parts != null && parts.length > 1) {
+        domain = parts[1] + '.' + parts[0];
+            
+        if (hostName.toLowerCase().indexOf('.co.uk') != -1
+                && parts.length > 2) {
+          domain = parts[2] + '.' + domain;
+        }
+    }
+    }
+    
+    return domain;
+}
+
+function getHostName(url) {
+    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+    if (match != null && match.length > 2 &&
+        typeof match[2] === 'string' && match[2].length > 0) {
+    return match[2];
+    }
+    else {
+        return null;
+    }
 }
 
 init();
