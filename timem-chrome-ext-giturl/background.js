@@ -285,6 +285,8 @@ function updateTime(theSite, timeSeconds) {
 	
 	var siteDomain = getDomain(theSite);
 	console.log(siteDomain);
+	var urlParts1 = siteDomain.split(".");
+	var siteDomain = urlParts1[0];
 	var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
 
 	if(trackingSitesList.indexOf(siteDomain) != -1){
@@ -381,7 +383,7 @@ function updateTime(theSite, timeSeconds) {
 
 function updateSocialTrackingArray(currentSessionObjId,socialTimeParse,siteDomain,timeSeconds){
 	
-	var trackingSitesList = 'facebook,yahoo,youtube,twitter,instagram,tumblr,dailymotion,pinterest,vine';
+	console.log(currentSessionObjId+"::"+socialTimeParse+"::"+siteDomain+"::"+timeSeconds);
 	if(typeof socialTimeParse == 'undefined' || socialTimeParse == ''){
 		var trackingSites = {};
 		trackingSites.facebook = 0;
