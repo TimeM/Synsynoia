@@ -107,6 +107,7 @@ function updateInfo() {
 									newbandDetails.title = newBandTitle;
 									var stTime = lastActiveLap.startTime;
 									newbandDetails.timeSpent = e - parseInt(stTime);
+									newbandDetails.lapStartTime = parseInt(stTime);
 									if(result.get("LapData")){
 										var objLapData = $.parseJSON(result.get("LapData"));
 										objLapData.push(newbandDetails);
@@ -167,6 +168,7 @@ function updateInfo() {
 									newbandDetails.title = newBandTitle;
 									var stTime = lastActiveLap.startTime;
 									newbandDetails.timeSpent = e - parseInt(stTime);
+									newbandDetails.lapStartTime = parseInt(stTime);
 									if(result.get("LapData")){
 										var objLapData = $.parseJSON(result.get("LapData"));
 										objLapData.push(newbandDetails);
@@ -309,6 +311,7 @@ function updateTime(theSite, timeSeconds) {
 							newbandDetails.title = "Study";
 							var stTime = lastActiveLap.startTime;
 							newbandDetails.timeSpent = e - parseInt(stTime);
+							newbandDetails.lapStartTime = parseInt(stTime);
 							if(result.get("LapData")){
 								var objLapData = $.parseJSON(result.get("LapData"));
 								objLapData.push(newbandDetails);

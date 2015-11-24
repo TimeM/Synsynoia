@@ -104,7 +104,7 @@ $(document).ready(function() {
 		
 		//Create record for parse loginDetails
 		var blankObj = JSON.stringify({"buttonMode":"","lapStatus":"","startTime":0});
-		var objLapData = [{"title":"Blank","timeSpent":0}];
+		var objLapData = [{"title":"Blank","timeSpent":0,"lapStartTime":0}];
 		var blankObjLapData = JSON.stringify(objLapData);
 		var trackingSites = {facebook:0, yahoo:0, youtube:0, twitter:0,instagram:0,tumblr:0,dailymotion:0,pinterest:0,vine:0};
 		trackingSitesString = JSON.stringify(trackingSites);
